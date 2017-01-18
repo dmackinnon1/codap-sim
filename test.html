@@ -11,7 +11,7 @@
 
 <body>
 
-<button id='testButton' onclick='check(event)'>check for codap</button>
+<button id='testButton' onclick='roll100Dice(event)'>roll 100 dice</button>
 </body>
 
 
@@ -21,6 +21,40 @@ function check(event) {
 	codapHelper.checkForCODAP();
 };
 
+function randomInt(lessThan){
+	var selection = Math.floor(Math.random()*(lessThan));
+	return selection;
+};
+
+function randomRange(greaterThan, lessThan){
+	var shifted = randomInt(lessThan - greaterThan);
+	return lessThan - shifted; 
+}
+
+
+var sampleNumber = 1;
+function roll100Dice() {
+	if( !codapHelper.checkForCODAP()) return;
+           
+	//generates child case
+	var doSample = function( iResult) {
+		var tID = iResult.caseID;
+              	var tHowMany = 100;
+                var rollDice = function() {
+                    if( tHowMany > 0) {
+                        var die1 = randomRange(0,6);
+			//var die2 = randomRange(0,6);
+                        // Tell CODAP to create a case in the child collection
+                        codapHelper.createCase('dice', die1, tID, rollDice);
+                        tHowMany--;
+                    } else codapHelper.closeCase('samples', null, tID);
+		};
+		rollDice(); //calls the child generator
+	}
+	codapHelper.openCase( 'samples', sampleNumber, doSample);
+	sampleNumber ++;
+};
+	
 codapHelper.initSim({
         name: 'Test',
         dimensions: {width: 300, height: 150},
@@ -32,17 +66,16 @@ codapHelper.initSim({
                 childAttrName: "sample"
             },
             {
-                name: 'numbers',
+                name: 'dice',
                 labels: {
-                    pluralCase: "numbers",
+                    pluralCase: "dice",
                     setOfCasesWithArticle: "a sample"
                 },
                 // The child collection also has just one attribute
-                attrs: [{name: "number", type: 'numeric', precision: 1}]
+                attrs: [{name: "die1", type: 'numeric', precision: 1}]
             }
         ]
     });
-
 </script>
 
 </html>
